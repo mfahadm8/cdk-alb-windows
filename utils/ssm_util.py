@@ -2,7 +2,6 @@ import boto3
 
 
 def get_ssm_param(param_name, region):
-    print(param_name)
     ssm_client = boto3.client("ssm", region)
     # create the ecs cluster
     param = None

@@ -102,7 +102,13 @@ class Ec2(Construct):
             block_devices=block_devices,
             role=self.__create_ec2_role(namespace),
             instance_name=instance_config["name"],
-            vpc_subnets=ec2.SubnetSelection(subnets=[self.__get_subnet(namespace)]),
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_filters=[
+                    ec2.SubnetFilter.select_subnets(
+                        self, _subnets=[self.__get_subnet(namespace)]
+                    )
+                ]  # [self.__get_subnet(namespace)]
+            ),
         )
 
     def __create_ec2_role(self, namespace) -> iam.Role:
@@ -130,7 +136,9 @@ class Ec2(Construct):
         )
         print(subnet_id)
         return ec2.Subnet.from_subnet_id(
-            self, "Subnet" + namespace, subnet_id=subnet_id
+            self,
+            self._config["compute"]["ec2"][namespace]["subnet_name"],
+            subnet_id=subnet_id,
         )
 
     def __setup_application_load_balancer(self):
