@@ -1,0 +1,31 @@
+aws_account: "964915130125"
+aws_region: eu-west-3
+
+network:
+  vpc:
+    cidr: 10.1.0.0/16
+
+  subnets:
+    # Client UI subnet
+    - cidrMask: 21
+      name: Public
+      subnetType: PUBLIC
+
+compute:
+  ecs:
+    App-Sp16:
+      repo_arn: "App-Sp16/standalone-chrome"
+      image_tag: "4.11.0-20230801"
+      port: 4444
+      cpu: 512
+      memory: 1024
+      minimum_containers: 1
+      maximum_containers: 10
+      fargate_spot:
+        weight: 75
+        base: 0
+      fargate:
+        weight: 25
+        base: 1
+
+    ecs2:

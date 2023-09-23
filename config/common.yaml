@@ -1,0 +1,24 @@
+name: appSp16Cloud
+tags:
+  app: appSp16Cloud
+
+domain:
+  hostedzone_id: XXXXXXXXXX
+  hostedzone_name: XXXXXXXXXXXXXX.XXX
+  cert_arn: cert_arn
+
+network:
+  vpc:
+    natGatewaySubnetName: Public
+    maxAzs: 2
+    cidr: 10
+
+  subnets:
+    # Private subnet
+    - cidrMask: 21
+      name: Private
+      subnetType: PRIVATE_WITH_EGRESS
+    # Client UI subnet
+    - cidrMask: 21
+      name: Public
+      subnetType: PUBLIC

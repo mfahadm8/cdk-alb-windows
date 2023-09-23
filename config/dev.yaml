@@ -1,0 +1,38 @@
+aws_account: "964915130125"
+aws_region: eu-west-3
+
+network:
+  vpc:
+    cidr: 10.0.0.0/16
+
+  subnets:
+    - cidrMask: 21
+      name: Public
+      subnetType: PUBLIC
+
+compute:
+  ecs:
+    App-Sp16:
+      service_count: 2
+      repo_arn: "App-Sp16/standalone-chrome"
+      image_tag: "4.11.0-20230801"
+      port: 4444
+      cpu: 512
+      memory: 1024
+      minimum_containers: 1
+      maximum_containers: 10
+      fargate_spot:
+        weight: 100
+        base: 1
+      fargate:
+        weight: 0
+        base: 0
+
+  ecs2:
+    App-Sp16_version: 3.141.59
+    memory: 512
+    cpu: 256
+    App-Sp16_node_max_instances: 5
+    App-Sp16_node_max_sessions: 5
+    min_instances: 1
+    max_instances: 5

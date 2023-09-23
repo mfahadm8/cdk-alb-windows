@@ -1,0 +1,17 @@
+{
+  "availability-zones:account=188775091215:region=us-east-1": [
+    "us-east-1a",
+    "us-east-1b",
+    "us-east-1c"
+  ],
+  "availability-zones:account=188775091215:region=eu-west-3": [
+    "eu-west-3a",
+    "eu-west-3b",
+    "eu-west-3c"
+  ],
+  "availability-zones:account=964915130125:region=eu-west-3": [
+    "eu-west-3a",
+    "eu-west-3b",
+    "eu-west-3c"
+  ]
+}
