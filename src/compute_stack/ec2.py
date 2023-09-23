@@ -46,70 +46,54 @@ class Ec2(Construct):
         # self.__setup_application_app_service_load_balancer_rule()
         # self.__setup_route53_domain()
 
-    def __create_windows_datacenter_instance(self, namespace):
-        ebs_devices = {
-            "/dev/sda1",
-            "/dev/sdb",
-            "/dev/sdc",
-        }
+    def __create_windows_datacenter_instance(self, namespace: str, vpc: ec2.Vpc):
         instance_config = self._config["compute"]["ec2"][namespace]
 
-        # Define the instance type, subnet, and security group
-        instance_type = ec2.InstanceType.of(
-            ec2.InstanceClass.M5, ec2.InstanceSize.XLARGE
-        )
-
-        ec2_security_group = ec2.SecurityGroup(
+        ec2_security_group = ec2.CfnSecurityGroup(
             self,
             f"{namespace}SecurityGroup",
-            vpc=self._vpc,
-            allow_all_outbound=True,
+            vpc_id=vpc.vpc_id,
+            group_description=f"Security group for {namespace} EC2 instance",
         )
 
-        # Add inbound rules to the security group
         for port in instance_config["security_group"]["inbound"]:
-            ec2_security_group.add_ingress_rule(
-                peer=ec2.Peer.any_ipv4(),
-                connection=ec2.Port.tcp(port),
-            )
-
-        block_devices = []
-        # Create EBS volumes dynamically based on the values in the configuration
-        for i, volume_size in enumerate(instance_config["ebs"], start=1):
-            # Use "/dev/sda1" for the root volume and "/dev/xvd[f-z]" for additional volumes
-            device_name = f"/dev/sda1" if i == 1 else f"/dev/xvd{chr(97+i)}"
-            block_devices.append(
-                ec2.BlockDevice(
-                    device_name=device_name,
-                    volume=ec2.BlockDeviceVolume.ebs(
-                        volume_size=100,  # C: 100GB
-                        volume_type=ec2.EbsDeviceVolumeType.GP2,
-                    ),
-                )
+            ec2_security_group.add_property_override(
+                f"InboundRules.{len(ec2_security_group.properties['SecurityGroupIngress'])}",
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": port,
+                    "ToPort": port,
+                    "CidrIp": "0.0.0.0/0",  # Adjust as needed
+                },
             )
 
         # Create the EC2 instance using configuration
-        ec2_instance = ec2.Instance(
+        ec2_instance = ec2.CfnInstance(
             self,
             namespace,
-            instance_type=instance_type,
-            machine_image=ec2.MachineImage.generic_linux(
-                ami_map={self._region: instance_config["ami"]}
-            ),
-            security_group=ec2_security_group,
+            instance_type=instance_config["instance_type"],
+            image_id=instance_config["ami"],
+            security_group_ids=[ec2_security_group.ref],
             key_name=instance_config["keypair"],
-            vpc=self._vpc,
-            block_devices=block_devices,
-            role=self.__create_ec2_role(namespace),
-            instance_name=instance_config["name"],
-            vpc_subnets=ec2.SubnetSelection(
-                subnet_filters=[
-                    ec2.SubnetFilter.select_subnets(
-                        self, _subnets=[self.__get_subnet(namespace)]
-                    )
-                ]  # [self.__get_subnet(namespace)]
-            ),
+            subnet_id=self.__get_subnet(namespace),
+            block_device_mappings=self.__create_block_devices(instance_config["ebs"]),
         )
+
+    def __create_block_devices(self, ebs_volumes: list) -> list:
+        block_devices = []
+
+        for i, volume_size in enumerate(ebs_volumes, start=1):
+            device_name = f"/dev/sda1" if i == 1 else f"/dev/xvd{chr(97+i)}"
+            block_device = {
+                "DeviceName": device_name,
+                "Ebs": {
+                    "VolumeSize": volume_size,
+                    "VolumeType": "gp2",  # Change to desired volume type
+                },
+            }
+            block_devices.append(block_device)
+
+        return block_devices
 
     def __create_ec2_role(self, namespace) -> iam.Role:
         # Create IAM role for EC2 instances
@@ -134,12 +118,7 @@ class Ec2(Construct):
             + self._config["compute"]["ec2"][namespace]["subnet_name"],
             self._config["aws_region"],
         )
-        print(subnet_id)
-        return ec2.Subnet.from_subnet_id(
-            self,
-            self._config["compute"]["ec2"][namespace]["subnet_name"],
-            subnet_id=subnet_id,
-        )
+        return subnet_id
 
     def __setup_application_load_balancer(self):
         # Create security group for the load balancer
