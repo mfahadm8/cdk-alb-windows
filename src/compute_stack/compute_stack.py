@@ -4,7 +4,7 @@ from aws_cdk import Stack, Fn, aws_ssm as ssm
 from utils.stack_util import add_tags_to_stack
 from .ec2 import Ec2
 from constructs import Construct
-
+from utils.ssm_util import SsmParameterFetcher
 
 class ComputeStack(Stack):
     def __init__(self, scope: Construct, id: str, config: Dict, **kwargs) -> None:
@@ -13,7 +13,8 @@ class ComputeStack(Stack):
         # Apply common tags to stack resources.
         add_tags_to_stack(self, config)
         # create the ecs cluster
-        vpc_id = ssm.StringParameter.value_for_string_parameter(
+        vpcSSM=SsmParameterFetcher(self,"VpcSSM",self.cof)
+        vpc_id = SsmParameterFetcher.value_for_string_parameter(
             self, "/sp16/app/" + config["stage"] + "/vpc_id"
         )
         self._ecs = Ec2(self, "Ecs", config, vpc_id)

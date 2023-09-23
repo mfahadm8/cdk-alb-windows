@@ -23,7 +23,6 @@ from aws_cdk import (
     Expiration,
 )
 from constructs import Construct
-from utils.ssm_util import SsmParameterFetcher
 import base64
 import json
 
