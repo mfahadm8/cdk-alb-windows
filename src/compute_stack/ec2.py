@@ -49,7 +49,7 @@ class Ec2(Construct):
 
     def __create_windows_datacenter_instance(self, namespace: str):
         instance_config = self._config["compute"]["ec2"][namespace]
-
+        print(instance_config["public_ip"])
         ec2_security_group = ec2.SecurityGroup(
             self,
             f"{namespace}SecurityGroup",
@@ -63,21 +63,26 @@ class Ec2(Construct):
                 peer=ec2.Peer.any_ipv4(),
                 connection=ec2.Port.tcp(port),
             )
-
+        subnet_id = self.__get_subnet(namespace)
         # Create the EC2 instance using configuration
         ec2_instance = ec2.CfnInstance(
             self,
             namespace,
             instance_type=instance_config["instance_type"],
             image_id=instance_config["ami"],
-            security_group_ids=[ec2_security_group.node.default_child.ref],
+            # security_group_ids=[ec2_security_group.node.default_child.ref],
             key_name=instance_config["keypair"],
-            subnet_id=self.__get_subnet(namespace),
+            network_interfaces=[
+                ec2.CfnInstance.NetworkInterfaceProperty(
+                    device_index="0",
+                    subnet_id=subnet_id,
+                    associate_public_ip_address=instance_config["public_ip"],
+                    group_set=[ec2_security_group.node.default_child.ref],
+                )
+            ],
             block_device_mappings=self.__create_block_devices(instance_config["ebs"]),
             tags=[CfnTag(key="Name", value=instance_config["name"])],
         )
-
-        Tags.of(ec2_instance).add("Name", instance_config["name"])
 
     def __create_block_devices(self, ebs_volumes: list) -> list:
         block_devices = []
