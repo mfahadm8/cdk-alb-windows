@@ -3,19 +3,19 @@ aws_region: eu-west-3
 
 network:
   vpc:
-    cidr: 10.0.0.0/16
+    cidr: 10.0.0.0/21
 
   subnets:
     private:
-      - cidr_block: 10.0.1.0/21
+      - cidr_block: 10.0.0.0/24
         avl_zone: us-east-1a
-      - cidr_block: 10.0.2.0/21
-        avl_zone: us-east-1a
+      - cidr_block: 10.0.1.0/24
+        avl_zone: us-east-1b
     public:
-      - cidr_block: 10.0.3.0/24
-        avl_zone: us-east-1a
-      - cidr_block: 10.0.4.0/24
-        avl_zone: us-east-1a
+      - cidr_block: 10.0.4.0/25
+        avl_zone: us-east-1c
+      - cidr_block: 10.0.4.128/25
+        avl_zone: us-east-1d
 
 compute:
   ecs:

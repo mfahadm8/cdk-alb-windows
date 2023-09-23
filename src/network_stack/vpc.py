@@ -21,7 +21,7 @@ class Vpc(Construct):
         public_subnets_config = self.config["network"]["subnets"]["public"]
 
         # Create VPC
-        vpc = ec2.Vpc(
+        self.vpc = ec2.Vpc(
             self,
             "app-sp16" + self.config["stage"],
             cidr=vpc_config["cidr"],
@@ -40,7 +40,7 @@ class Vpc(Construct):
         ec2.CfnVPCGatewayAttachment(
             self,
             "GatewayToInternet",
-            vpc_id=vpc.vpc_id,
+            vpc_id=self.vpc.vpc_id,
             internet_gateway_id=internet_gateway.ref,
         )
 
@@ -48,13 +48,13 @@ class Vpc(Construct):
         private_route_table = ec2.CfnRouteTable(
             self,
             "PrivateRouteTable",
-            vpc_id=vpc.vpc_id,
+            vpc_id=self.vpc.vpc_id,
         )
 
         public_route_table = ec2.CfnRouteTable(
             self,
             "PublicRouteTable",
-            vpc_id=vpc.vpc_id,
+            vpc_id=self.vpc.vpc_id,
         )
 
         nat_gateway_subnet = None
@@ -65,7 +65,7 @@ class Vpc(Construct):
             public_subnet = ec2.Subnet(
                 self,
                 f"PublicSubnet{idx}",
-                vpc=vpc,
+                vpc_id=self.vpc.vpc_id,
                 availability_zone=subnet_config["avl_zone"],
                 cidr_block=subnet_config["cidr_block"],
             )
@@ -79,8 +79,6 @@ class Vpc(Construct):
             )
 
             if idx == 0:
-                # Allocate NAT Gateway EIP and create NAT Gateway in the first public subnet
-                nat_gateway_eip = ec2.CfnEIP(self, "NATGatewayEIP")
                 nat_gateway_subnet = public_subnet
 
         # Create NAT Gateway in the first public subnet with the allocated EIP
@@ -96,7 +94,7 @@ class Vpc(Construct):
             private_subnet = ec2.Subnet(
                 self,
                 f"PrivateSubnet{idx}",
-                vpc=vpc,
+                vpc_id=self.vpc.vpc_id,
                 availability_zone=subnet_config["avl_zone"],
                 cidr_block=subnet_config["cidr_block"],
             )
