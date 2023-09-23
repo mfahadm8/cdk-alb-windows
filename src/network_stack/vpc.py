@@ -62,13 +62,13 @@ class Vpc(Construct):
         nat_gateway_subnet = None
         nat_gateway_eip = ec2.CfnEIP(self, "NATGatewayEIP")
 
-        # Add default route to NAT Gateway in the Private Route Table
+        # Add default route to Internet Gateway in the Public Route Table
         ec2.CfnRoute(
             self,
-            f"PrivateRouteNatGW",
-            route_table_id=private_route_table.ref,
+            f"PrivateRouteIGW",
+            route_table_id=public_route_table.ref,
             destination_cidr_block="0.0.0.0/0",
-            nat_gateway_id=nat_gateway.ref,
+            nat_gateway_id=internet_gateway.ref,
         )
 
         # Iterate over public subnets configuration
@@ -100,13 +100,13 @@ class Vpc(Construct):
             allocation_id=nat_gateway_eip.attr_allocation_id,
         )
 
-        # Add default route to Internet Gateway in the Public Route Table
+        # Add default route to NAT Gateway in the Private Route Table
         ec2.CfnRoute(
             self,
-            f"PrivateRouteIGW",
-            route_table_id=public_route_table.ref,
+            f"PrivateRouteNatGW",
+            route_table_id=private_route_table.ref,
             destination_cidr_block="0.0.0.0/0",
-            nat_gateway_id=internet_gateway.ref,
+            nat_gateway_id=nat_gateway.ref,
         )
 
         # Iterate over private subnets configuration
