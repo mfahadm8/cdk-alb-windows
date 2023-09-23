@@ -93,14 +93,16 @@ class Ec2(Construct):
             self,
             namespace,
             instance_type=instance_type,
-            machine_image=ec2.MachineImage.lookup(instance_config["ami"]),
+            machine_image=ec2.MachineImage.generic_linux(
+                ami_map={self._region: instance_config["ami"]}
+            ),
             security_group=ec2_security_group,
             key_name=instance_config["keypair"],
             vpc=self._vpc,
             block_devices=block_devices,
             role=self.__create_ec2_role(namespace),
             instance_name=instance_config["name"],
-            vpc_subnets=self.__get_subnet(namespace),  # Replace with the appropriate selection logic
+            vpc_subnets=ec2.SubnetSelection(subnets=[self.__get_subnet(namespace)]),
         )
 
     def __create_ec2_role(self, namespace) -> iam.Role:
@@ -120,10 +122,16 @@ class Ec2(Construct):
 
     def __get_subnet(self, namespace):
         subnet_id = get_ssm_param(
-            "/sp16/app/" + self._config["stage"] + self._config["subnet_name"],
+            "/sp16/app/"
+            + self._config["stage"]
+            + "/"
+            + self._config["compute"]["ec2"][namespace]["subnet_name"],
             self._config["aws_region"],
         )
-        return ec2.Subnet.from_subnet_id(subnet_id)
+        print(subnet_id)
+        return ec2.Subnet.from_subnet_id(
+            self, "Subnet" + namespace, subnet_id=subnet_id
+        )
 
     def __setup_application_load_balancer(self):
         # Create security group for the load balancer

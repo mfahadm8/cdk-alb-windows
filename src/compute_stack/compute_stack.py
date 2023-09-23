@@ -10,12 +10,13 @@ from utils.ssm_util import get_ssm_param
 class ComputeStack(Stack):
     def __init__(self, scope: Construct, id: str, config: Dict, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
-        ssm_client = boto3.client("ssm", config["aws_region"])
         # Apply common tags to stack resources.
         add_tags_to_stack(self, config)
         # create the ecs cluster
         vpc_id = get_ssm_param(
-            "/sp16/app/" + config["stage"] + "/vpc_id", config["aws_region"]
+            param_name="/sp16/app/" + config["stage"] + "/vpc_id",
+            region=config["aws_region"],
         )
+        print(vpc_id)
         if vpc_id:
             self._ecs = Ec2(self, "Ecs", config, vpc_id)

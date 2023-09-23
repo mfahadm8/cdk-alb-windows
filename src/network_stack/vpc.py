@@ -145,7 +145,7 @@ class Vpc(Construct):
                 string_value=private_subnet.ref,
                 parameter_name="/sp16/app/"
                 + self.config["stage"]
-                + f"/privatesubnet{idx}_id",
+                + f"/PrivateSubnet{idx}",
             )
 
         ssm.StringParameter(

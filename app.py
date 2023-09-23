@@ -27,11 +27,11 @@ network_stack = NetworkStack(
     app, "App-Sp16-NetworkStack-" + config["stage"], config=config, env=env
 )
 
-# compute_stack = ComputeStack(
-#     app,
-#     "App-Sp16-ComputeStack-" + config["stage"],
-#     config=config,
-#     env=env,
-# )
+compute_stack = ComputeStack(
+    app,
+    "App-Sp16-ComputeStack-" + config["stage"],
+    config=config,
+    env=env,
+)
 
 app.synth()
