@@ -21,6 +21,7 @@ from aws_cdk import (
     aws_iam as iam,
     RemovalPolicy,
     Expiration,
+    CfnTag,
 )
 from constructs import Construct
 import base64
@@ -73,7 +74,10 @@ class Ec2(Construct):
             key_name=instance_config["keypair"],
             subnet_id=self.__get_subnet(namespace),
             block_device_mappings=self.__create_block_devices(instance_config["ebs"]),
+            tags=[CfnTag(key="Name", value=instance_config["name"])],
         )
+
+        Tags.of(ec2_instance).add("Name", instance_config["name"])
 
     def __create_block_devices(self, ebs_volumes: list) -> list:
         block_devices = []
