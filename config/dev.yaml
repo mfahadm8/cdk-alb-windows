@@ -1,5 +1,5 @@
-aws_account: "964915130125"
-aws_region: eu-west-3
+aws_account: "766944019823"
+aws_region: us-east-1
 
 network:
   vpc:
