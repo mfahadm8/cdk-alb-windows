@@ -73,7 +73,7 @@ class Vpc(Construct):
         )
 
         # Iterate over public subnets configuration
-        for idx, subnet_config in enumerate(public_subnets_config):
+        for idx, subnet_config in enumerate(public_subnets_config, start=1):
             public_subnet = ec2.CfnSubnet(
                 self,
                 f"PublicSubnet{idx}",
@@ -90,8 +90,17 @@ class Vpc(Construct):
                 subnet_id=public_subnet.ref,
                 route_table_id=public_route_table.ref,
             )
+            ssm.StringParameter(
+                scope=self,
+                id=f"PublicSubnet{idx}SSM",
+                tier=ssm.ParameterTier.STANDARD,
+                string_value=public_subnet.ref,
+                parameter_name="/sp16/app/"
+                + self.config["stage"]
+                + f"/publicsubnet{idx}_id",
+            )
 
-            if idx == 0:
+            if idx == 1:
                 nat_gateway_subnet = public_subnet
 
         # Create NAT Gateway in the first public subnet with the allocated EIP
@@ -112,7 +121,7 @@ class Vpc(Construct):
         )
 
         # Iterate over private subnets configuration
-        for idx, subnet_config in enumerate(private_subnets_config):
+        for idx, subnet_config in enumerate(private_subnets_config, start=1):
             private_subnet = ec2.CfnSubnet(
                 self,
                 f"PrivateSubnet{idx}",
@@ -128,6 +137,15 @@ class Vpc(Construct):
                 f"PrivateSubnet{idx}RouteTableAssociation",
                 subnet_id=private_subnet.ref,
                 route_table_id=private_route_table.ref,
+            )
+            ssm.StringParameter(
+                scope=self,
+                id=f"privateSubnet{idx}SSM",
+                tier=ssm.ParameterTier.STANDARD,
+                string_value=private_subnet.ref,
+                parameter_name="/sp16/app/"
+                + self.config["stage"]
+                + f"/privatesubnet{idx}_id",
             )
 
         ssm.StringParameter(

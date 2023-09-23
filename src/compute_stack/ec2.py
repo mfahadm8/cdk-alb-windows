@@ -72,6 +72,21 @@ class Ec2(Construct):
                 connection=ec2.Port.tcp(port),
             )
 
+        block_devices = []
+        # Create EBS volumes dynamically based on the values in the configuration
+        for i, volume_size in enumerate(instance_config["ebs"], start=1):
+            # Use "/dev/sda1" for the root volume and "/dev/xvd[f-z]" for additional volumes
+            device_name = f"/dev/sda1" if i == 1 else f"/dev/xvd{chr(97+i)}"
+            block_devices.append(
+                ec2.BlockDevice(
+                    device_name=device_name,
+                    volume=ec2.BlockDeviceVolume.ebs(
+                        volume_size=100,  # C: 100GB
+                        volume_type=ec2.EbsDeviceVolumeType.GP2,
+                    ),
+                )
+            )
+
         # Create the EC2 instance using configuration
         ec2_instance = ec2.Instance(
             self,
@@ -81,24 +96,13 @@ class Ec2(Construct):
             security_group=ec2_security_group,
             key_name=instance_config["keypair"],
             vpc=self._vpc,
-            role=self.__create_ec2_role(),
+            block_devices=block_devices,
+            role=self.__create_ec2_role(namespace),
             instance_name=instance_config["name"],
             vpc_subnets=ec2.SubnetSelection(
                 subnet_group_name=instance_config["subnet_name"]
             ),  # Replace with the appropriate selection logic
         )
-
-        # Create EBS volumes dynamically based on the values in the configuration
-        for i, volume_size in enumerate(instance_config["ebs"], start=1):
-            # Use "/dev/sda1" for the root volume and "/dev/xvd[f-z]" for additional volumes
-            device_name = f"/dev/sda1" if i == 1 else f"/dev/xvd{chr(97+i)}"
-            ec2_instance.add_block_device_mapping(
-                device_name=device_name,
-                volume=ec2.BlockDeviceVolume.ebs(
-                    volume_size=volume_size,
-                    volume_type=ec2.EbsDeviceVolumeType.GP2,
-                ),
-            )
 
     def __create_ec2_role(self, namespace) -> iam.Role:
         # Create IAM role for EC2 instances
