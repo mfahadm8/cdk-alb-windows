@@ -30,6 +30,7 @@ class Vpc(Construct):
             cidr_block=self.config["network"]["vpc"]["cidr"],
             enable_dns_support=True,
             enable_dns_hostnames=True,
+            tags=[{"key": "Name", "value": "AppSp6Vpc"}],
         )
 
         # Create Internet Gateway
@@ -79,6 +80,7 @@ class Vpc(Construct):
                 vpc_id=self.vpc.ref,
                 availability_zone=subnet_config["avl_zone"],
                 cidr_block=subnet_config["cidr_block"],
+                tags=[{"key": "Name", "value": f"PublicSubnet{idx}"}],
             )
 
             # Associate Public Subnets with the Public Route Table
@@ -117,6 +119,7 @@ class Vpc(Construct):
                 vpc_id=self.vpc.ref,
                 availability_zone=subnet_config["avl_zone"],
                 cidr_block=subnet_config["cidr_block"],
+                tags=[{"key": "Name", "value": f"PrivateSubnet{idx}"}],
             )
 
             # Associate Private Subnets with the Private Route Table
