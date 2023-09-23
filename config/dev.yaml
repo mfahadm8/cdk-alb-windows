@@ -6,9 +6,16 @@ network:
     cidr: 10.0.0.0/16
 
   subnets:
-    - cidrMask: 21
-      name: Public
-      subnetType: PUBLIC
+    private:
+      - cidr_block: 10.0.1.0/21
+        avl_zone: us-east-1a
+      - cidr_block: 10.0.2.0/21
+        avl_zone: us-east-1a
+    public:
+      - cidr_block: 10.0.3.0/24
+        avl_zone: us-east-1a
+      - cidr_block: 10.0.4.0/24
+        avl_zone: us-east-1a
 
 compute:
   ecs:
@@ -27,12 +34,3 @@ compute:
       fargate:
         weight: 0
         base: 0
-
-  ecs2:
-    App-Sp16_version: 3.141.59
-    memory: 512
-    cpu: 256
-    App-Sp16_node_max_instances: 5
-    App-Sp16_node_max_sessions: 5
-    min_instances: 1
-    max_instances: 5
