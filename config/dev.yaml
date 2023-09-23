@@ -16,3 +16,44 @@ network:
         avl_zone: us-east-1c
       - cidr_block: 10.0.4.128/25
         avl_zone: us-east-1d
+
+
+compute:
+  ec2:
+    instance1:
+      name: Instance1
+      subnet_name: PublicSubnet0
+      ami: ami-0be0e902919675894
+      keypair: dev
+      security_group:
+        inbound:
+          - 22
+          - 443
+        outbound:
+          - all
+      
+
+    instance2:
+      name: Instance2
+      subnet_name: PublicSubnet1
+      ami: ami-0be0e902919675894
+      keypair: dev
+      security_group:
+        inbound:
+          - 22
+          - 443
+        outbound:
+          - all
+      
+    instance3:
+      name: Instance2
+      subnet_name: PrivateSubnet1
+      ami: ami-04cbc618ff43040aa
+      keypair: dev
+      security_group:
+        inbound:
+          - 22
+          - 1443
+        outbound:
+          - all
+      
