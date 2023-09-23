@@ -4,8 +4,7 @@ from aws_cdk import Stack, Fn, aws_ssm as ssm
 from utils.stack_util import add_tags_to_stack
 from .ec2 import Ec2
 from constructs import Construct
-from utils.ssm_util import SsmParameterFetcher
-import boto3
+from utils.ssm_util import get_ssm_param
 
 
 class ComputeStack(Stack):
@@ -15,17 +14,8 @@ class ComputeStack(Stack):
         # Apply common tags to stack resources.
         add_tags_to_stack(self, config)
         # create the ecs cluster
-        vpc_id = None
-        try:
-            response = ssm_client.get_parameter(
-                Name="/sp16/app/" + config["stage"] + "/vpc_id",
-                WithDecryption=True,  # To decrypt secure string parameters
-            )
-
-            # Extract the value of the parameter
-            vpc_id = response["Parameter"]["Value"]
-        except:
-            pass
-        
+        vpc_id = get_ssm_param(
+            "/sp16/app/" + config["stage"] + "/vpc_id", config["aws_region"]
+        )
         if vpc_id:
             self._ecs = Ec2(self, "Ecs", config, vpc_id)

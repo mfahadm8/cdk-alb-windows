@@ -25,6 +25,7 @@ from aws_cdk import (
 from constructs import Construct
 import base64
 import json
+from utils.ssm_util import get_ssm_param
 
 
 class Ec2(Construct):
@@ -92,16 +93,14 @@ class Ec2(Construct):
             self,
             namespace,
             instance_type=instance_type,
-            machine_image=ec2.MachineImage.from_ssm_parameter(instance_config["ami"]),
+            machine_image=ec2.MachineImage.lookup(instance_config["ami"]),
             security_group=ec2_security_group,
             key_name=instance_config["keypair"],
             vpc=self._vpc,
             block_devices=block_devices,
             role=self.__create_ec2_role(namespace),
             instance_name=instance_config["name"],
-            vpc_subnets=ec2.SubnetSelection(
-                subnet_group_name=instance_config["subnet_name"]
-            ),  # Replace with the appropriate selection logic
+            vpc_subnets=self.__get_subnet(namespace),  # Replace with the appropriate selection logic
         )
 
     def __create_ec2_role(self, namespace) -> iam.Role:
@@ -118,6 +117,13 @@ class Ec2(Construct):
         )
 
         return role
+
+    def __get_subnet(self, namespace):
+        subnet_id = get_ssm_param(
+            "/sp16/app/" + self._config["stage"] + self._config["subnet_name"],
+            self._config["aws_region"],
+        )
+        return ec2.Subnet.from_subnet_id(subnet_id)
 
     def __setup_application_load_balancer(self):
         # Create security group for the load balancer

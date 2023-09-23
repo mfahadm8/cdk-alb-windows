@@ -97,7 +97,7 @@ class Vpc(Construct):
                 string_value=public_subnet.ref,
                 parameter_name="/sp16/app/"
                 + self.config["stage"]
-                + f"/publicsubnet{idx}_id",
+                + f"/PublicSubnet{idx}",
             )
 
             if idx == 1:

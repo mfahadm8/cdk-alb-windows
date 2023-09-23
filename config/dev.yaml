@@ -22,7 +22,7 @@ compute:
   ec2:
     instance1:
       name: Instance1
-      subnet_name: PublicSubnet0
+      subnet_name: PublicSubnet1
       ami: ami-0be0e902919675894
       keypair: dev
       ebs:
@@ -40,7 +40,7 @@ compute:
 
     instance2:
       name: Instance2
-      subnet_name: PublicSubnet1
+      subnet_name: PublicSubnet2
       ami: ami-0be0e902919675894
       keypair: dev
       ebs:
