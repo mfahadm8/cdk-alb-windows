@@ -43,8 +43,6 @@ class Ec2(Construct):
         self.__create_windows_datacenter_instance_1()
 
         self.__setup_application_load_balancer()
-        self.__setup_application_training_service_load_balancer_rule()
-        self.__setup_application_training2x_service_load_balancer_rule()
         self.__setup_application_app_service_load_balancer_rule()
         self.__setup_route53_domain()
 
@@ -129,7 +127,7 @@ class Ec2(Construct):
         lb_security_group = ec2.SecurityGroup(
             self,
             "LoadBalancerSecurityGroup",
-            vpc=self._cluster.vpc,
+            vpc=self._vpc,
             allow_all_outbound=True,
         )
         lb_security_group.add_ingress_rule(
@@ -151,7 +149,7 @@ class Ec2(Construct):
         app_target_group = elbv2.ApplicationTargetGroup(
             self,
             "TargetGroup-App",
-            vpc=self._cluster.vpc,
+            vpc=self._vpc,
             protocol=elbv2.ApplicationProtocol.HTTP,
             targets=[self._app_sp16_app_service],
             health_check=elbv2.HealthCheck(
@@ -164,34 +162,13 @@ class Ec2(Construct):
             ),
         )
 
-        # Create the listener rule
-        rule = elbv2.CfnListenerRule(
-            self,
-            "ListenerRule",
-            listener_arn=self.lb_https_listener.listener_arn,
-            priority=50,
-            actions=[
-                elbv2.CfnListenerRule.ActionProperty(
-                    type="forward",
-                    target_group_arn=app_target_group.target_group_arn,
-                )
-            ],
-            conditions=[
-                elbv2.CfnListenerRule.RuleConditionProperty(
-                    field="path-pattern",
-                    values=["/v1/generation/*"],
-                )
-            ],
-        )
-
-        rule.add_dependency(app_target_group.node.default_child)
-
         # Create HTTP listener for redirection
-        # self.lb_http_listener = self.lb.add_listener(
-        #     "HttpListener", port=80, protocol=elbv2.ApplicationProtocol.HTTP,
-        #     default_target_groups=[app_target_group],
-        #
-        # )
+        self.lb_http_listener = self.lb.add_listener(
+            "HttpListener",
+            port=80,
+            protocol=elbv2.ApplicationProtocol.HTTP,
+            default_target_groups=[app_target_group],
+        )
 
     def __setup_route53_domain(self):
         # Add listener certificate (assuming you have a certificate in AWS Certificate Manager)
