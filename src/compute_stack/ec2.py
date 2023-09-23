@@ -38,16 +38,23 @@ class Ec2(Construct):
         self._region = self._config["aws_region"]
         # Create cluster control plane
         self._vpc = ec2.Vpc.from_lookup(self, "Sp16Vpc", vpc_id=vpc_id)
-        self.__create_windows_datacenter_instance_1()
-        self.__create_windows_datacenter_instance_1()
-        self.__create_windows_datacenter_instance_1()
+        self.__create_windows_datacenter_instance("instance1")
+        self.__create_windows_datacenter_instance("instance2")
+        self.__create_windows_datacenter_instance("instance3")
 
-        self.__setup_application_load_balancer()
-        self.__setup_application_app_service_load_balancer_rule()
-        self.__setup_route53_domain()
+        # self.__setup_application_load_balancer()
+        # self.__setup_application_app_service_load_balancer_rule()
+        # self.__setup_route53_domain()
 
-    def __create_windows_datacenter_instance_1(self):
-        instance_config = self._config["compute"]["ec2"]["instance1"]
+    def __create_windows_datacenter_instance(self,namespace):
+        
+        ebs_devices={
+            "/dev/sda1",
+            "/dev/sdb",
+            "/dev/sdc",
+            
+        }
+        instance_config = self._config["compute"]["ec2"][namespace]
 
         # Define the instance type, subnet, and security group
         instance_type = ec2.InstanceType.of(
@@ -56,7 +63,7 @@ class Ec2(Construct):
 
         ec2_security_group = ec2.SecurityGroup(
             self,
-            "WindowsInstance1SecurityGroup",
+            f"{namespace}SecurityGroup",
             vpc=self._vpc,
             allow_all_outbound=True,
         )
@@ -71,7 +78,7 @@ class Ec2(Construct):
         # Create the EC2 instance using configuration
         ec2_instance = ec2.Instance(
             self,
-            "WindowsInstance1",
+            namespace,
             instance_type=instance_type,
             machine_image=ec2.MachineImage.from_ssm_parameter(instance_config["ami"]),
             security_group=ec2_security_group,

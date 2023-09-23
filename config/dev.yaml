@@ -25,9 +25,14 @@ compute:
       subnet_name: PublicSubnet0
       ami: ami-0be0e902919675894
       keypair: dev
+      ebs:
+        - 1000
+        - 2000
+        - 3000
       security_group:
         inbound:
           - 22
+          - 3389
           - 443
         outbound:
           - all
@@ -38,9 +43,13 @@ compute:
       subnet_name: PublicSubnet1
       ami: ami-0be0e902919675894
       keypair: dev
+      ebs:
+        - 1000
+        - 2000
       security_group:
         inbound:
           - 22
+          - 3389
           - 443
         outbound:
           - all
@@ -50,9 +59,15 @@ compute:
       subnet_name: PrivateSubnet1
       ami: ami-04cbc618ff43040aa
       keypair: dev
+      ebs:
+        - 1000
+        - 2000
+        - 3000
+        - 4000
       security_group:
         inbound:
           - 22
+          - 3389
           - 1443
         outbound:
           - all
