@@ -1,18 +1,19 @@
 from typing import Dict
 
-from aws_cdk import aws_ec2 as ec2, Stack
+from aws_cdk import Stack, Fn, aws_ssm as ssm
 from utils.stack_util import add_tags_to_stack
 from .ec2 import Ec2
 from constructs import Construct
 
 
 class ComputeStack(Stack):
-    def __init__(
-        self, scope: Construct, id: str, config: Dict, vpc: ec2.IVpc, **kwargs
-    ) -> None:
+    def __init__(self, scope: Construct, id: str, config: Dict, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
         # Apply common tags to stack resources.
         add_tags_to_stack(self, config)
         # create the ecs cluster
-        self._ecs = Ecs(self, "Ecs", config, vpc)
+        vpc_id = ssm.StringParameter.value_for_string_parameter(
+            self, "/sp16/app/" + config["stage"] + "/vpc_id"
+        )
+        self._ecs = Ec2(self, "Ecs", config, vpc_id)

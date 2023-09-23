@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from aws_cdk import aws_ec2 as ec2
+from aws_cdk import aws_ec2 as ec2, aws_ssm as ssm
 from constructs import Construct
 
 
@@ -129,3 +129,11 @@ class Vpc(Construct):
                 subnet_id=private_subnet.ref,
                 route_table_id=private_route_table.ref,
             )
+
+        ssm.StringParameter(
+            scope=self,
+            id="vpcId",
+            tier=ssm.ParameterTier.STANDARD,
+            string_value=self.vpc.ref,
+            parameter_name="/sp16/app/" + self.config["stage"] + "/vpc_id",
+        )
