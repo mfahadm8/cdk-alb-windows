@@ -68,7 +68,7 @@ class Vpc(Construct):
             f"PrivateRouteIGW",
             route_table_id=public_route_table.ref,
             destination_cidr_block="0.0.0.0/0",
-            nat_gateway_id=internet_gateway.ref,
+            gateway_id=internet_gateway.ref,
         )
 
         # Iterate over public subnets configuration
