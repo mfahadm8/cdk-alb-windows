@@ -71,14 +71,6 @@ class Vpc(Construct):
             nat_gateway_id=nat_gateway.ref,
         )
 
-        # Add default route to Internet Gateway in the Public Route Table
-        ec2.CfnRoute(
-            self,
-            f"PrivateRouteIGW",
-            route_table_id=public_route_table.ref,
-            destination_cidr_block="0.0.0.0/0",
-            nat_gateway_id=internet_gateway.ref,
-        )
         # Iterate over public subnets configuration
         for idx, subnet_config in enumerate(public_subnets_config):
             public_subnet = ec2.CfnSubnet(
@@ -106,6 +98,15 @@ class Vpc(Construct):
             "NATGateway",
             subnet_id=nat_gateway_subnet.ref,
             allocation_id=nat_gateway_eip.attr_allocation_id,
+        )
+
+        # Add default route to Internet Gateway in the Public Route Table
+        ec2.CfnRoute(
+            self,
+            f"PrivateRouteIGW",
+            route_table_id=public_route_table.ref,
+            destination_cidr_block="0.0.0.0/0",
+            nat_gateway_id=internet_gateway.ref,
         )
 
         # Iterate over private subnets configuration
