@@ -1,4 +1,4 @@
-aws_account: "766944019823"
+aws_account: "188775091215"
 aws_region: us-east-1
 
 network:
@@ -16,21 +16,3 @@ network:
         avl_zone: us-east-1c
       - cidr_block: 10.0.4.128/25
         avl_zone: us-east-1d
-
-compute:
-  ecs:
-    App-Sp16:
-      service_count: 2
-      repo_arn: "App-Sp16/standalone-chrome"
-      image_tag: "4.11.0-20230801"
-      port: 4444
-      cpu: 512
-      memory: 1024
-      minimum_containers: 1
-      maximum_containers: 10
-      fargate_spot:
-        weight: 100
-        base: 1
-      fargate:
-        weight: 0
-        base: 0

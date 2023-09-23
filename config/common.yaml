@@ -7,7 +7,3 @@ domain:
   hostedzone_name: XXXXXXXXXXXXXX.XXX
   cert_arn: cert_arn
 
-network:
-  vpc:
-    natGatewaySubnetName: Public
-    maxAzs: 2
