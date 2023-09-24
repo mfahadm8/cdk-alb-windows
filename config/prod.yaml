@@ -18,3 +18,63 @@ network:
         avl_zone: us-east-1d
 
 
+compute:
+  ec2:
+    instance1:
+      name: Instance1
+      subnet_name: PublicSubnet1
+      ami: ami-0be0e902919675894
+      instance_type: m5a.xlarge
+      keypair: dev
+      public_ip: true
+      ebs:
+        - 1000
+        - 2000
+        - 3000
+      security_group:
+        inbound:
+          - 22
+          - 3389
+          - 443
+        outbound:
+          - all
+      
+
+    instance2:
+      name: Instance2
+      subnet_name: PublicSubnet2
+      ami: ami-0be0e902919675894
+      instance_type: m5a.xlarge
+      public_ip: true
+      keypair: dev
+      ebs:
+        - 1000
+        - 2000
+      security_group:
+        inbound:
+          - 22
+          - 3389
+          - 443
+        outbound:
+          - all
+      
+    instance3:
+      name: Instance3
+      subnet_name: PrivateSubnet1
+      instance_type: m4.xlarge
+      ami: ami-04cbc618ff43040aa
+      public_ip: false
+      keypair: dev
+      ebs:
+        - 1000
+        - 2000
+        - 3000
+        - 4000
+      security_group:
+        inbound:
+          - 22
+          - 3389
+          - 1443
+        outbound:
+          - all
+      

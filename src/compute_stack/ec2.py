@@ -43,7 +43,7 @@ class Ec2(Construct):
         self.__create_windows_datacenter_instance("instance2")
         self.__create_windows_datacenter_instance("instance3")
 
-        # self.__setup_application_load_balancer()
+        self.__setup_application_load_balancer()
         # self.__setup_application_app_service_load_balancer_rule()
         # self.__setup_route53_domain()
 
@@ -127,24 +127,33 @@ class Ec2(Construct):
 
     def __setup_application_load_balancer(self):
         # Create security group for the load balancer
+        alb_config = self._config["compute"]["alb"]
+        print(alb_config["public_ip"])
         lb_security_group = ec2.SecurityGroup(
             self,
-            "LoadBalancerSecurityGroup",
+            "LbSecurityGroup",
             vpc=self._vpc,
             allow_all_outbound=True,
         )
-        lb_security_group.add_ingress_rule(
-            peer=ec2.Peer.any_ipv4(),
-            connection=ec2.Port.tcp(80),
-        )
 
+        subnets_list=[]
+        # Add inbound rules to the security group
+        for port in alb_config["security_group"]["inbound"]:
+            lb_security_group.add_ingress_rule(
+                peer=ec2.Peer.any_ipv4(),
+                connection=ec2.Port.tcp(port),
+            )
+            
+        for subnet in alb_config["subnet"]:
+            subnets_list.append(self.__get_subnet(subnet))
         # Create load balancer
         self.lb = elbv2.ApplicationLoadBalancer(
             self,
             "LoadBalancer",
-            vpc=self._cluster.vpc,
+            vpc=self._vpc,
             internet_facing=True,
             security_group=lb_security_group,
+            vpc_subnets=subnets_list
         )
 
     def __setup_application_app_service_load_balancer_rule(self):
