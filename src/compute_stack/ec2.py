@@ -125,10 +125,16 @@ class Ec2(Construct):
         )
         return subnet_id
 
+    def __get_alb_subnet(self, namespace):
+        subnet_id = get_ssm_param(
+            "/sp16/app/" + self._config["stage"] + "/" + namespace,
+            self._config["aws_region"],
+        )
+        return subnet_id
+
     def __setup_application_load_balancer(self):
         # Create security group for the load balancer
         alb_config = self._config["compute"]["alb"]
-        print(alb_config["public_ip"])
         lb_security_group = ec2.SecurityGroup(
             self,
             "LbSecurityGroup",
@@ -136,24 +142,29 @@ class Ec2(Construct):
             allow_all_outbound=True,
         )
 
-        subnets_list=[]
+        subnets_list = []
         # Add inbound rules to the security group
         for port in alb_config["security_group"]["inbound"]:
             lb_security_group.add_ingress_rule(
                 peer=ec2.Peer.any_ipv4(),
                 connection=ec2.Port.tcp(port),
             )
-            
+
         for subnet in alb_config["subnet"]:
-            subnets_list.append(self.__get_subnet(subnet))
+            subnets_list.append(self.__get_alb_subnet(subnet))
         # Create load balancer
-        self.lb = elbv2.ApplicationLoadBalancer(
+        self.lb = elbv2.CfnLoadBalancer(
             self,
-            "LoadBalancer",
-            vpc=self._vpc,
-            internet_facing=True,
-            security_group=lb_security_group,
-            vpc_subnets=subnets_list
+            "MyLoadBalancer",
+            scheme="internet-facing",
+            load_balancer_attributes=[
+                {
+                    "key": "idle_timeout.timeout_seconds",
+                    "value": "60",  # Replace with your desired idle timeout value
+                }
+            ],
+            subnets=subnets_list,
+            security_groups=[lb_security_group.security_group_id],
         )
 
     def __setup_application_app_service_load_balancer_rule(self):
