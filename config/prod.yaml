@@ -78,3 +78,11 @@ compute:
         outbound:
           - all
       
+  alb:
+    subnet:
+      - PrivateSubnet1
+      - PublicSubnet2
+    security_group:
+      inbound:
+        - 443
+        - 80

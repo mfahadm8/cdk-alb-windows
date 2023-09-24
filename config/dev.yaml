@@ -85,6 +85,5 @@ compute:
       - PublicSubnet2
     security_group:
       inbound:
-        - 22
-        - 3389
-        - 1443
+        - 443
+        - 80
