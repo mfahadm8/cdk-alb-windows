@@ -23,6 +23,8 @@ env = Environment(
     region=config["aws_region"],
 )
 
+app.node.set_context("profile", config["profile"])
+
 network_stack = NetworkStack(
     app, "App-Sp16-NetworkStack-" + config["stage"], config=config, env=env
 )

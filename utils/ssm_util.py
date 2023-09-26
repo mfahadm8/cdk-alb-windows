@@ -1,8 +1,9 @@
 import boto3
 
 
-def get_ssm_param(param_name, region):
-    ssm_client = boto3.client("ssm", region)
+def get_ssm_param(param_name, region, profile):
+    session = boto3.Session(profile_name=profile)
+    ssm_client = session.client("ssm", region)
     # create the ecs cluster
     param = None
     try:

@@ -16,6 +16,7 @@ class ComputeStack(Stack):
         vpc_id = get_ssm_param(
             param_name="/sp16/app/" + config["stage"] + "/vpc_id",
             region=config["aws_region"],
+            profile=config["profile"],
         )
         print(vpc_id)
         if vpc_id:

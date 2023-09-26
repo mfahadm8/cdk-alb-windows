@@ -122,6 +122,7 @@ class Ec2(Construct):
             + "/"
             + self._config["compute"]["ec2"][namespace]["subnet_name"],
             self._config["aws_region"],
+            self._config["profile"],
         )
         return subnet_id
 
@@ -129,6 +130,7 @@ class Ec2(Construct):
         subnet_id = get_ssm_param(
             "/sp16/app/" + self._config["stage"] + "/" + namespace,
             self._config["aws_region"],
+            self._config["profile"],
         )
         return subnet_id
 
